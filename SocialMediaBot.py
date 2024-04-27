@@ -96,7 +96,10 @@ class SocialMediaBot:
         """
         Creates a new WordPress post with the successfully posted Twitter message.
         """
-        wp_update = f"{quote_prefix} {quote} - {character}"
+        if character:
+            wp_update = f"{quote_prefix} {quote} - {character}"
+        else:
+            wp_update = f"{quote_prefix} {quote}"
         try:
             wp_url = self.config["wp_url"]
             wp_username = self.config["wp_username"]
@@ -127,7 +130,10 @@ class SocialMediaBot:
         """
         Tweets the quote with the specified prefix and suffix.
         """
-        tweet = f"{quote_prefix} {quote} - {character} {quote_suffix}"
+        if character:
+            tweet = f"{quote_prefix} {quote} - {character} {quote_suffix}"
+        else:
+            tweet = f"{quote_prefix} {quote} {quote_suffix}"
 
         if len(tweet) > 280:
             logging.info(tweet)
@@ -176,10 +182,17 @@ class SocialMediaBot:
         self.auth = tweepy.OAuthHandler(self.config["twitter_consumer_key"], self.config["twitter_consumer_secret"])
         self.auth.set_access_token(self.config["twitter_access_token"], self.config["twitter_access_token_secret"])
         self.api = tweepy.API(self.auth)
-        self.gemini_url =  f"{self.config['gemini_api']}={self.config['gemini_api_key']}"
+        self.gemini_url = f"{self.config['gemini_api']}={self.config['gemini_api_key']}"
+
+        duplicate_quote_recieved = ""
 
         for i in range(self.config["max_gemini_attempts"]):
-            data = {"contents": [{"parts": [{"text": self.config["gemini_prompt"]}]}]}
+            if duplicate_quote_recieved:
+                gemini_prompt = f"{duplicate_quote_recieved} {self.config['gemini_prompt']}"
+                logging.info(f"GEMINI PROMPT: {gemini_prompt}")
+                data = {"contents": [{"parts": [{"text": gemini_prompt}]}]}
+            else:
+                data = {"contents": [{"parts": [{"text": self.config["gemini_prompt"]}]}]}
             headers = {"Content-Type": "application/json"}
             response = self.ask_gemini(self.gemini_url, headers, data)
 
@@ -194,14 +207,13 @@ class SocialMediaBot:
             self.cursor.execute("SELECT quote FROM Quotes")
             existing_quotes = [row[0] for row in self.cursor.fetchall()]
 
-            #if all(fuzz.ratio(new_quote_text, quote) < 90 for quote in existing_quotes):  # Compare only the quote text
-            if all(fuzz.token_sort_ratio(new_quote_text, quote) < 70 for quote in existing_quotes):  # Compare only the quote text
+            if all(fuzz.token_sort_ratio(new_quote_text, quote) < 70 for quote in existing_quotes):
                 sent_to_twitter = "no"
                 sent_to_wordpress = "no"
                 sent_to_whatsapp = "no"
                 if self.config["send_to_twitter"] == "yes" and self.tweet_quote(new_quote_text, character, self.config["quote_prefix"], self.config["quote_suffix"]):
                     sent_to_twitter = "yes"
-                if self.config["send_to_wordpress"] == "yes" and self.create_wp_post(new_quote_text, character,  self.config["quote_prefix"], self.config["quote_suffix"]):
+                if self.config["send_to_wordpress"] == "yes" and self.create_wp_post(new_quote_text, character, self.config["quote_prefix"], self.config["quote_suffix"]):
                     sent_to_wordpress = "yes"
                 if self.config["send_to_whatsapp"] == "yes" and self.send_to_whatsapp(new_quote_text, character, self.config["quote_prefix"], self.config["quote_suffix"]):
                     sent_to_whatsapp = "yes"
@@ -209,7 +221,12 @@ class SocialMediaBot:
                 self.conn.commit()
                 break
             else:
-                logging.debug(f"Quote already exists in DB, retrying... (attempt {i+1})")
+                if not duplicate_quote_recieved:
+                    duplicate_quote_recieved = "Give me a quote that is not from the following list: "  # Initialize as a string
+
+                duplicate_quote_recieved += new_quote_text + " | "
+
+                logging.info(f"Quote already exists in DB, retrying... (attempt {i+1})")
                 time.sleep(10)  # Add a delay of 10 seconds before retrying
         else:
             logging.error("Error: Unable to generate a new quote after maximum attempts")

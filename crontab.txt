@@ -18,3 +18,9 @@
 BASE_DIR="/home/adabalap/Source/SocialMediaBot"
 59 3 * * * ${BASE_DIR}/rotate_config.sh
 0 4 * * * python3.12 ${BASE_DIR}/SocialMediaBot.py  ${BASE_DIR}/cfg/config.json
+#####################################################################################
+# AI quotes for padfoot
+#####################################################################################
+BASE_DIR="/home/adabalap/Source/SocialMediaBot"
+59 5,17 * * * ${BASE_DIR}/cfg/padfoot/rotate_config.sh
+0 6,18 * * * python3.12 ${BASE_DIR}/SocialMediaBot.py  ${BASE_DIR}/cfg/padfoot/config.json

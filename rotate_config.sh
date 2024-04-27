@@ -7,7 +7,7 @@ HOME_DIR="/home/adabalap/Source/SocialMediaBot/cfg"
 LOG_FILE="$HOME_DIR/../SocialMediaBot.log"
 
 # Array of file names
-files=("$HOME_DIR/config.json.kungfupanda" "$HOME_DIR/config.json.startrek" "$HOME_DIR/config.json.starwars")
+files=("$HOME_DIR/config.json.kungfupanda" "$HOME_DIR/config.json.startrek" "$HOME_DIR/config.json.starwars" "$HOME_DIR/config.json.stevencovey")
 
 # Get the length of the array
 length=${#files[@]}
