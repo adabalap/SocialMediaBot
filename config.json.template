@@ -5,7 +5,7 @@
     "twitter_access_token_secret": "<secrect>",
     "gemini_api": "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key",
     "gemini_api_key": "<key>",
-    "gemini_prompt": "Give a quote from Star Wars movie. This quote has to be less  than 250 characters in length",
+    "gemini_prompt": "Give me a quote from Ernest Hemingway Author in the format: '[Quote] :: [Character Name], form [Book Name] by Ernest Hemingway', Also no double \"",
     "quote_prefix": "🤖 ",
     "quote_suffix": "\n#StarWars #MovieQuotes https://bit.ly/3Uj0vI4",
     "db_file": "/home/adabalap/Source/SocialMediaBot/quotes_data.db",
