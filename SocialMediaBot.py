@@ -233,7 +233,7 @@ class SocialMediaBot:
                 break
             else:
                 if not duplicate_quote_recieved:
-                    duplicate_quote_recieved = "Give me a quote that is not from the following list: "  # Initialize as a string
+                    duplicate_quote_recieved = "And, give me a quote that is not from the following list: "  # Initialize as a string
 
                 duplicate_quote_recieved += new_quote_text + " ; "
 
