@@ -64,8 +64,15 @@ class SocialMediaBot:
         """
         Extracts the quote and the character from the string.
         """
-        match = re.search(r'"(.*?)" [-–] (.*?)$', quote)
-        return match.groups() if match else (quote, "")
+        # Split the quote using the pattern "::"
+        parts = re.split(r"::", quote)
+    
+        # If there are two parts, assume the first part is the quote and the second part is the character
+        if len(parts) == 2:
+            return parts[0].strip(), parts[1].strip()
+        else:
+            # If not split correctly, return the original quote and an empty character
+            return quote, ""
 
     def ask_gemini(self, url, headers, data):
         """
@@ -153,7 +160,11 @@ class SocialMediaBot:
         Sends the quote to WhatsApp.
         """
         quote = f"*{quote}*"  # Add asterisks to make the quote bold in WhatsApp
-        whatsapp_update = f"{quote_prefix}  {quote} \n\n-{character}"
+        if character:
+            whatsapp_update = f"{quote_prefix}  {quote} \n\n-{character}"
+        else:
+            whatsapp_update = f"{quote_prefix}  {quote}"
+
         payload = {'chatId': self.config["whatsapp_chat_id"], 'text': whatsapp_update, 'session': 'default'}
         whatsapp_api_headers = '{"Content-Type": "application/json"}'
         whatsapp_api_headers_dict = json.loads(whatsapp_api_headers)
@@ -188,7 +199,7 @@ class SocialMediaBot:
 
         for i in range(self.config["max_gemini_attempts"]):
             if duplicate_quote_recieved:
-                gemini_prompt = f"{duplicate_quote_recieved} {self.config['gemini_prompt']}"
+                gemini_prompt = f"{self.config['gemini_prompt']} {duplicate_quote_recieved}"
                 logging.info(f"GEMINI PROMPT: {gemini_prompt}")
                 data = {"contents": [{"parts": [{"text": gemini_prompt}]}]}
             else:
@@ -224,7 +235,7 @@ class SocialMediaBot:
                 if not duplicate_quote_recieved:
                     duplicate_quote_recieved = "Give me a quote that is not from the following list: "  # Initialize as a string
 
-                duplicate_quote_recieved += new_quote_text + " | "
+                duplicate_quote_recieved += new_quote_text + " ; "
 
                 logging.info(f"Quote already exists in DB, retrying... (attempt {i+1})")
                 time.sleep(10)  # Add a delay of 10 seconds before retrying
