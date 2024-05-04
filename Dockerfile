@@ -1,6 +1,10 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12-alpine
 
+# Set the time zone
+ENV TZ=Asia/Kolkata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Set the working directory in the container to /app
 WORKDIR /app
 
@@ -10,11 +14,8 @@ ADD . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install cron and tzdata for timezone data
-RUN apk add --no-cache dcron tzdata
-
-# Set the timezone to India
-ENV TZ=Asia/Kolkata
+# Install cron
+RUN apk add --no-cache dcron
 
 # Copy crontab file to the cron.d directory
 COPY config/crontab.txt /etc/cron.d/crontab
@@ -29,5 +30,5 @@ RUN crontab /etc/cron.d/crontab
 RUN touch /var/log/cron.log
 
 # Run the command on container startup
-CMD crond -l 2 -f && while true; do sleep 30; done
+CMD crond -l 2 -f
 
