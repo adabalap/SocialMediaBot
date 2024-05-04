@@ -43,4 +43,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/arm64
           push: true
-          tags: adabalap/SocialMediaBot:${{ github.ref }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/SocialMediaBot:${{ github.ref_name }}
