@@ -4,7 +4,9 @@ data/*
 
 # But don't ignore the directory itself
 !logs/
+!logs/.gitkeep
 !data/
+!data/.gitkeep
 !config/
 !config/template.json
 # Ignore the the directory and everything under it

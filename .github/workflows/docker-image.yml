@@ -43,4 +43,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/SocialMediaBot:${{ github.ref_name }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/socialmediabot:${{ github.ref_name }}
