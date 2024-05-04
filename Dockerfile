@@ -10,7 +10,21 @@ ADD . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install cron
+RUN apk add --no-cache dcron
 
-# Run main.py when the container launches, replace this with your own command
-CMD ["python", "main.py", "config/main.json"]
+# Copy crontab file to the cron.d directory
+COPY crontab.txt /etc/cron.d/crontab
+
+# Give execution rights on the cron job
+RUN chmod 0644 /etc/cron.d/crontab
+
+# Apply cron job
+RUN crontab /etc/cron.d/crontab
+
+# Create the log file to be able to run tail
+RUN touch /var/log/cron.log
+
+# Run the command on container startup
+CMD crond && tail -f /var/log/cron.log
 
