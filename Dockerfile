@@ -29,5 +29,5 @@ RUN crontab /etc/cron.d/crontab
 RUN touch /var/log/cron.log
 
 # Run the command on container startup
-CMD crond && while true; do sleep 30; done
+CMD crond -l 2 -f && while true; do sleep 30; done
 
