@@ -10,11 +10,14 @@ ADD . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install cron
-RUN apk add --no-cache dcron
+# Install cron and tzdata for timezone data
+RUN apk add --no-cache dcron tzdata
+
+# Set the timezone to India
+ENV TZ=Asia/Kolkata
 
 # Copy crontab file to the cron.d directory
-COPY crontab.txt /etc/cron.d/crontab
+COPY config/crontab.txt /etc/cron.d/crontab
 
 # Give execution rights on the cron job
 RUN chmod 0644 /etc/cron.d/crontab
@@ -26,5 +29,5 @@ RUN crontab /etc/cron.d/crontab
 RUN touch /var/log/cron.log
 
 # Run the command on container startup
-CMD crond && tail -f /var/log/cron.log
+CMD crond && while true; do sleep 30; done
 
