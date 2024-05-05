@@ -1,7 +1,10 @@
 #!/bin/sh
 
+# User directory is passed as an argument
+USER_DIR=$1
+
 # Directory where the files are located
-HOME_DIR="/app/config"
+HOME_DIR="/app/config/$USER_DIR"
 
 # Log file
 LOG_FILE="/app/logs/SocialMediaBot.log"

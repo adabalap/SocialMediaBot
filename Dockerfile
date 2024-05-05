@@ -18,5 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN chmod +x /app/rotate_config.sh
 
 # The command that will be run when the container starts
-CMD /app/rotate_config.sh && python3.12 /app/main.py /app/config/main.json
+#CMD /app/rotate_config.sh && python3.12 /app/main.py /app/config/main.json
+
+#
+# Now, the above is overridden in the deployment file, this way ist's more user configurable
+#
 
