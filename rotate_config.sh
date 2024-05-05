@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Directory where the files are located
 HOME_DIR="/app/config"

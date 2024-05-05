@@ -14,6 +14,9 @@ ADD . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Make the script executable
+RUN chmod +x /app/rotate_config.sh
+
 # The command that will be run when the container starts
 CMD /app/rotate_config.sh && python3.12 /app/main.py /app/config/main.json
 
