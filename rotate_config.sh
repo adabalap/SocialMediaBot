@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Directory where the files are located
 HOME_DIR="/app/config"
@@ -6,11 +6,8 @@ HOME_DIR="/app/config"
 # Log file
 LOG_FILE="/app/logs/SocialMediaBot.log"
 
-# Array of file names
-files=($(find $HOME_DIR -type f -name "*.json" ! -name "main.json"))
-
-# Get the length of the array
-length=${#files[@]}
+# Get the list of file names
+files=$(find $HOME_DIR -type f -name "*.json" ! -name "main.json")
 
 # Read the index from the file
 if [ -f "$HOME_DIR/index.txt" ]; then
@@ -19,14 +16,23 @@ else
   index=0
 fi
 
+# Convert the list of files into an array
+set -- $files
+
+# Get the length of the array
+length=$#
+
+# Get the file at the current index
+file=$(printf "%s\n" $files | sed -n "$((index+1))p")
+
 # Log the start of the operation
-echo "$(date '+%Y-%m-%d %H:%M:%S') INFO Start of operation, using file ${files[$index]} at index $index" >> $LOG_FILE
+echo "$(date '+%Y-%m-%d %H:%M:%S') INFO Start of operation, using file $file at index $index" >> $LOG_FILE
 
 # Copy the current file to config.json
-cp ${files[$index]} "$HOME_DIR/main.json"
+cp $file "$HOME_DIR/main.json"
 
 # Log the current main config file
-echo "$(date '+%Y-%m-%d %H:%M:%S') INFO ${files[$index]} at index $index is now the main config file" >> $LOG_FILE
+echo "$(date '+%Y-%m-%d %H:%M:%S') INFO $file at index $index is now the main config file" >> $LOG_FILE
 
 # Increment the index
 index=$((index + 1))
