@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Directory where the files are located
-HOME_DIR="/home/adabalap/Source/SocialMediaBot/cfg"
+HOME_DIR="/app/config"
 
 # Log file
-LOG_FILE="$HOME_DIR/../SocialMediaBot.log"
+LOG_FILE="/app/logs/SocialMediaBot.log"
 
 # Array of file names
-files=("$HOME_DIR/config.json.kungfupanda" "$HOME_DIR/config.json.startrek" "$HOME_DIR/config.json.starwars" "$HOME_DIR/config.json.stevencovey")
+files=($(find $HOME_DIR -type f -name "*.json" ! -name "main.json"))
 
 # Get the length of the array
 length=${#files[@]}
@@ -23,7 +23,7 @@ fi
 echo "$(date '+%Y-%m-%d %H:%M:%S') INFO Start of operation, using file ${files[$index]} at index $index" >> $LOG_FILE
 
 # Copy the current file to config.json
-cp ${files[$index]} "$HOME_DIR/config.json"
+cp ${files[$index]} "$HOME_DIR/main.json"
 
 # Log the current main config file
 echo "$(date '+%Y-%m-%d %H:%M:%S') INFO ${files[$index]} at index $index is now the main config file" >> $LOG_FILE

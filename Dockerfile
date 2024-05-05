@@ -14,21 +14,6 @@ ADD . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install cron
-RUN apk add --no-cache dcron
-
-# Copy crontab file to the cron.d directory
-COPY config/crontab.txt /etc/cron.d/crontab
-
-# Give execution rights on the cron job
-RUN chmod 0644 /etc/cron.d/crontab
-
-# Apply cron job
-RUN crontab /etc/cron.d/crontab
-
-# Create the log file to be able to run tail
-RUN touch /var/log/cron.log
-
-# Run the command on container startup
-CMD crond -l 2 -f
+# The command that will be run when the container starts
+CMD /app/rotate_config.sh && python3.12 /app/main.py /app/config/main.json
 
