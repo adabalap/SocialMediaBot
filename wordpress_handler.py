@@ -11,8 +11,7 @@ def create_wp_post(config, quote, character, quote_prefix, quote_suffix):
         wp_update = f"{quote_prefix} {quote}"
     try:
         wp_url = config["wp_url"]
-        wp_username = config["wp_username"]
-        wp_password = config["wp_password"]
+        wp_token = config["wp_token"]  # This should be your JWT token
         wp_category = config["wp_category"]
 
         post = {
@@ -22,7 +21,7 @@ def create_wp_post(config, quote, character, quote_prefix, quote_suffix):
             "categories": [wp_category]  # The category of the post
         }
 
-        response = requests.post(f"{wp_url}/wp-json/wp/v2/posts", headers={"Authorization": f"Basic {wp_username}:{wp_password}"}, json=post)
+        response = requests.post(f"{wp_url}/wp-json/wp/v2/posts", headers={"Authorization": f"Bearer {wp_token}"}, json=post)
 
         if response.status_code == 201:
             logging.info(f"WordPress post created with ID: {response.json()['id']}!")
