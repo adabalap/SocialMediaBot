@@ -3,6 +3,7 @@ import time
 import logging
 from rapidfuzz import fuzz, process
 from datetime import datetime
+import string
 from config import load_config
 from database import setup_db
 from logging_config import setup_logging
@@ -19,12 +20,17 @@ class SocialMediaBot:
         self.gemini_url = setup_gemini(config['gemini_api'], config['gemini_api_key'])
         self.whatsapp_api_url, self.whatsapp_api_headers_dict, self.whatsapp_api_key = setup_whatsapp(config["whatsapp_api_url"], config["whatsapp_api_key"])
 
+    def normalize_quote(self, quote):
+        # Normalize the quote by converting to lowercase, removing punctuation, and stripping extra whitespace
+        return ''.join(char for char in quote.lower() if char not in string.punctuation).strip()
+
     def run(self):
-        duplicate_quote_recieved = ""
+        duplicate_quotes = []  # Initialize as a list to collect duplicate quotes
+        generated_quotes = set()  # Track previously generated quotes in memory
 
         for i in range(self.config["max_gemini_attempts"]):
-            if duplicate_quote_recieved:
-                gemini_prompt = f"{self.config['gemini_prompt']} {duplicate_quote_recieved}"
+            if duplicate_quotes:
+                gemini_prompt = f"{self.config['gemini_prompt']} Ensure the new quote isn't from the following list of quotes: {'; '.join(duplicate_quotes)}"
                 logging.info(f"GEMINI PROMPT: {gemini_prompt}")
                 data = {"contents": [{"parts": [{"text": gemini_prompt}]}]}
             else:
@@ -38,11 +44,16 @@ class SocialMediaBot:
                 continue
 
             new_quote_text, character = extract_quote_and_character(new_quote)
+            normalized_new_quote = self.normalize_quote(new_quote_text)
 
             self.cursor.execute("SELECT quote FROM Quotes")
-            existing_quotes = [row[0] for row in self.cursor.fetchall()]
+            existing_quotes = [self.normalize_quote(row[0]) for row in self.cursor.fetchall()]
 
-            if all(fuzz.token_sort_ratio(new_quote_text, quote) < 70 for quote in existing_quotes):
+            # Use multiple fuzzy matching methods and increase the similarity threshold
+            if all(fuzz.token_sort_ratio(normalized_new_quote, quote) < 85 and
+                   fuzz.ratio(normalized_new_quote, quote) < 85 and
+                   fuzz.partial_ratio(normalized_new_quote, quote) < 85 and
+                   fuzz.token_set_ratio(normalized_new_quote, quote) < 85 for quote in existing_quotes) and normalized_new_quote not in generated_quotes:
                 logging.debug(f"Checking if the quote already exists in the DB...")
                 sent_to_twitter = "no"
                 sent_to_wordpress = "no"
@@ -57,13 +68,10 @@ class SocialMediaBot:
 
                 self.cursor.execute("INSERT INTO Quotes (character, quote, date, sent_to_twitter, sent_to_wordpress, sent_to_whatsapp) VALUES (?, ?, ?, ?, ?, ?)", (character, new_quote_text, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), sent_to_twitter, sent_to_wordpress, sent_to_whatsapp))
                 self.conn.commit()
+                generated_quotes.add(normalized_new_quote)
                 break
             else:
-                if not duplicate_quote_recieved:
-                    duplicate_quote_recieved = ". Ensure, the new quote isn't from the following list of quote's: "  # Initialize as a string
-
-                duplicate_quote_recieved += new_quote_text + " ; "
-
+                duplicate_quotes.append(new_quote_text)  # Add the duplicate quote to the list
                 logging.info(f"Quote already exists in DB, retrying... (attempt {i+1})")
                 time.sleep(10)  # Add a delay of 10 seconds before retrying
         else:
@@ -78,4 +86,3 @@ if __name__ == "__main__":
     setup_logging(config["log_file"], config["logging_level"])
     bot = SocialMediaBot(config)
     bot.run()
-
