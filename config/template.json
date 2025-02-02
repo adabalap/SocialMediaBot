@@ -19,6 +19,7 @@
     "whatsapp_api_url": "<API URL>",
     "whatsapp_api_key": "<api key>",
     "whatsapp_chat_id": "<chat id>",
+    "whatsapp_status": "yes",
     "send_to_twitter": "yes",
     "send_to_wordpress": "yes",
     "send_to_whatsapp": "yes",
