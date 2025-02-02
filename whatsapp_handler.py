@@ -20,16 +20,26 @@ def send_to_whatsapp(config, quote, character, quote_prefix, quote_suffix):
     else:
         whatsapp_update = f"{quote_prefix}  {quote}"
 
-    payload = {'chatId': config["whatsapp_chat_id"], 'text': whatsapp_update, 'session': 'default'}
-    whatsapp_api_headers = '{"Content-Type": "application/json"}'
-    whatsapp_api_headers_dict = json.loads(whatsapp_api_headers)
-
-    response = requests.post(
-        config["whatsapp_api_url"],
-        json=payload,
-        headers=json.loads(whatsapp_api_headers),  # Load headers directly
-        auth=(config["whatsapp_api_key"], '')
-    )
+    if config.get("whatsapp_status") == "yes":
+        url = 'https://waha.adabala.com/api/status'  # Replace with your WAHA endpoint
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            'message': whatsapp_update
+        }
+        response = requests.post(url, json=payload, headers=headers)
+    else:
+        payload = {'chatId': config["whatsapp_chat_id"], 'text': whatsapp_update, 'session': 'default'}
+        whatsapp_api_headers = '{"Content-Type": "application/json"}'
+        whatsapp_api_headers_dict = json.loads(whatsapp_api_headers)
+    
+        response = requests.post(
+            config["whatsapp_api_url"],
+            json=payload,
+            headers=json.loads(whatsapp_api_headers),  # Load headers directly
+            auth=(config["whatsapp_api_key"], '')
+        )
 
     if response.status_code == 200 or response.status_code == 201:
         logging.info("WhatsApp message sent!")
