@@ -28,9 +28,15 @@ def send_to_whatsapp(config, quote, character, quote_prefix, quote_suffix):
 
     logging.info(f"Formatted WhatsApp Update: {whatsapp_update}")
 
-    payload = {'message': whatsapp_update}
+    payload = {
+        'contacts': None,
+        'text': whatsapp_update,
+        'backgroundColor': '#38b42f',  # You can customize this color
+        'font': 0  # You can customize the font
+    }
     headers = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'accept': '*/*'
     }
 
     if config.get("whatsapp_status") == "yes":
